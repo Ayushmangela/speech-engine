@@ -39,7 +39,9 @@ graph TD
 │   ├── diarize.py        # pyannote.audio speaker diarization & speaker renaming
 │   ├── merge.py          # Alignment engine for STT + speaker timelines
 │   ├── benchmark.py      # Profiling metrics & Real-Time Factor (RTF) compiler
-│   └── main.py           # Entrypoint: FastAPI web application & CLI routing
+│   ├── main.py           # Entrypoint: FastAPI web application & CLI routing
+│   └── templates/
+│       └── index.html    # Developer local web test dashboard (Vanilla CSS & JS)
 ├── audio/
 │   ├── raw/              # Saved copies of uploaded raw files
 │   └── normalized/       # FFmpeg-normalized 16kHz mono WAV files
@@ -125,12 +127,13 @@ You can run the pipeline directly on an audio file from the terminal. This runs 
 python -m src.main --audio path/to/your/audio.mp3
 ```
 
-### 2. FastAPI Web Server
-To start the FastAPI web server for integration:
+### 2. FastAPI Web Server & Developer Dashboard
+To start the FastAPI web server which serves both the REST API and the local developer test interface:
 ```bash
 uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
 ```
-Visit `http://localhost:8000/docs` to access the interactive Swagger API documentation.
+- Open `http://localhost:8000` in your web browser to access the interactive **Developer Dashboard** (allows file upload, live microphone recording, status updates, results visualizer, and artifact downloads).
+- Open `http://localhost:8000/docs` to access the interactive **Swagger API documentation**.
 
 #### API Endpoint: `POST /api/v1/diarize`
 Uploads an audio file and returns the merged speaker transcript as JSON.
@@ -196,3 +199,26 @@ ruff check src/ tests/
 - **PyAV/av Compilation Errors:** On macOS, newer FFmpeg versions (like FFmpeg 7 or 8) might conflict with older PyAV. We bypass this by manually upgrading to `av>=18.0.0` which features prebuilt macOS ARM64 binary wheels.
 - **Hugging Face access terms:** If pyannote fails to load, ensure you have accepted the agreements on BOTH [pyannote/speaker-diarization-3.1](https://huggingface.co/pyannote/speaker-diarization-3.1) and [pyannote/segmentation-3.0](https://huggingface.co/pyannote/segmentation-3.0) on Hugging Face, and that your `HF_TOKEN` in `.env` is correct.
 - **Apple Silicon (M1/M2/M3) MPS Support:** Torch fully utilizes MPS for pyannote.audio, while CTranslate2 (faster-whisper) executes on the CPU since it doesn't feature an MPS backend. This is handled automatically by the `ModelRegistry`.
+
+---
+
+## Known Compatibility Notes
+
+During production audit and validation, the following library compatibility layers were integrated to support PyTorch 2.6+, NumPy 2.x, and the latest Hugging Face hub configurations:
+
+1. **`huggingface_hub` `use_auth_token` TypeError:**
+   * **Symptom:** `TypeError: hf_hub_download() got an unexpected keyword argument 'use_auth_token'` when loading pyannote pipelines.
+   * **Fix:** Pinned `huggingface-hub>=0.13,<0.25.0` in dependencies to maintain backward compatibility with legacy parameters required by older `pyannote.audio` builds.
+
+2. **Matplotlib ModuleNotFoundError:**
+   * **Symptom:** `ModuleNotFoundError: No module named 'matplotlib'` during diarization loading.
+   * **Fix:** Installed `matplotlib` as it is unconditionally imported inside pyannote's core segmentation tasks.
+
+3. **PyTorch 2.6+ strict `weights_only=True` Unpickling Error:**
+   * **Symptom:** `_pickle.UnpicklingError: Weights only load failed... Unsupported global: GLOBAL torch.torch_version.TorchVersion was not an allowed global.`
+   * **Fix:** Implemented a temporary, thread-safe monkeypatch of `torch.load` during the `from_pretrained` call in `src/registry.py` to bypass `weights_only` restrictions for this trusted HF repository, safely restoring it in a `finally` block.
+
+4. **NumPy 2.x uppercase `np.NAN` AttributeError:**
+   * **Symptom:** `AttributeError: module 'numpy' has no attribute 'NAN'` during diarization speaker turns reconstruction.
+   * **Fix:** Added a process-wide NumPy compatibility monkeypatch in `src/registry.py` setting `np.NAN = np.nan` and `np.NaN = np.nan` at runtime if missing.
+

@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech Engine - Developer Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0f172a;
+            --bg-surface: #1e293b;
+            --bg-element: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --brand-primary: #8b5cf6;
+            --brand-gradient: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+            --accent-success: #10b981;
+            --accent-error: #ef4444;
+            --border-color: #334155;
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+        }
+
+        header {
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 2rem;
+            background-color: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.5rem;
+            background: var(--brand-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo::before {
+            content: "🔊";
+            font-size: 1.4rem;
+        }
+
+        .badge {
+            background-color: rgba(139, 92, 246, 0.15);
+            color: #c084fc;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        main {
+            max-width: 1200px;
+            width: 100%;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+            flex-grow: 1;
+        }
+
+        .grid-panels {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .grid-panels {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--brand-gradient);
+            opacity: 0;
+            transition: var(--transition-smooth);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: -1rem;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            background-color: rgba(15, 23, 42, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--brand-primary);
+            background-color: rgba(139, 92, 246, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            background: var(--brand-gradient);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 12px -1px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--bg-element);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background-color: #475569;
+            box-shadow: none;
+        }
+
+        .btn-danger {
+            background: var(--accent-error);
+            box-shadow: none;
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn:disabled {
+            background: var(--bg-element);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            border: 1px solid var(--border-color);
+        }
+
+        .audio-rec-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .audio-player-container {
+            background-color: rgba(15, 23, 42, 0.5);
+            padding: 1rem;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        audio {
+            width: 100%;
+            height: 36px;
+        }
+
+        .status-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .status-step {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+            transition: var(--transition-smooth);
+        }
+
+        .status-step.active {
+            color: var(--brand-primary);
+            font-weight: 500;
+        }
+
+        .status-step.completed {
+            color: var(--accent-success);
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--bg-element);
+            transition: var(--transition-smooth);
+        }
+
+        .status-step.active .status-dot {
+            background-color: var(--brand-primary);
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.3);
+            animation: pulse 1.5s infinite;
+        }
+
+        .status-step.completed .status-dot {
+            background-color: var(--accent-success);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.6; }
+            100% { transform: scale(0.9); opacity: 1; }
+        }
+
+        .error-card {
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            background-color: rgba(239, 68, 68, 0.05);
+            padding: 1.25rem;
+            border-radius: 8px;
+            color: #fca5a5;
+            display: none;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .error-title {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .results-container {
+            display: none;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .metric-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+
+        .metric-val {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-top: 0.25rem;
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .downloads-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .transcript-view {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            max-height: 500px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .segment-block {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            padding-left: 1rem;
+            border-left: 3px solid var(--brand-primary);
+        }
+
+        .segment-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .segment-speaker {
+            font-weight: 600;
+            color: #c084fc;
+        }
+
+        .segment-time {
+            color: var(--text-secondary);
+            font-family: monospace;
+            background-color: var(--bg-element);
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+        }
+
+        .segment-conf {
+            color: var(--text-secondary);
+        }
+
+        .segment-text {
+            color: var(--text-primary);
+            font-size: 1.05rem;
+        }
+
+        .low-conf {
+            color: #f87171;
+            font-style: italic;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border-color);
+            background-color: rgba(15, 23, 42, 0.5);
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo">Speech Engine</div>
+            <div class="badge">Local Dev Dashboard</div>
+        </div>
+    </header>
+
+    <main>
+        <div class="grid-panels">
+            <div class="card">
+                <h2>📁 Audio Processing Portal</h2>
+                <p class="subtitle">Submit a local audio file or record speech directly in-browser.</p>
+                
+                <div class="upload-area" id="drop-zone">
+                    <span class="upload-icon">📥</span>
+                    <span style="font-weight: 500;">Choose an audio file or drag & drop</span>
+                    <span class="subtitle">Supports WAV, MP3, M4A, FLAC, OGG, AAC</span>
+                    <button class="btn btn-secondary" style="margin-top: 0.5rem;" onclick="document.getElementById('file-picker').click()">Browse Files</button>
+                    <input type="file" id="file-picker" class="file-input" accept="audio/*">
+                </div>
+
+                <div style="text-align: center; color: var(--text-secondary); font-size: 0.9rem;">— OR —</div>
+
+                <div class="audio-player-container">
+                    <div style="font-weight: 500; font-size: 0.95rem; text-align: center;" id="rec-status">Browser Microphone Recorder</div>
+                    <div class="audio-rec-controls">
+                        <button class="btn" id="btn-record-start">🎤 Start Rec</button>
+                        <button class="btn btn-danger" id="btn-record-stop" disabled>🛑 Stop Rec</button>
+                    </div>
+                    <audio id="recorded-audio-playback" controls style="display: none; margin-top: 0.5rem;"></audio>
+                </div>
+
+                <button class="btn" id="btn-pipeline-submit" disabled style="width: 100%; margin-top: 0.5rem; height: 3rem; font-size: 1.05rem;">⚡ Process Pipeline</button>
+            </div>
+
+            <div class="card">
+                <h2>📈 Execution Monitor</h2>
+                <p class="subtitle">Live tracking of the processing modules.</p>
+                
+                <div class="status-container">
+                    <div class="status-step" id="step-validate">
+                        <div class="status-dot"></div>
+                        <span>1. Validating Audio File...</span>
+                    </div>
+                    <div class="status-step" id="step-normalize">
+                        <div class="status-dot"></div>
+                        <span>2. FFmpeg Normalization (16kHz Mono)...</span>
+                    </div>
+                    <div class="status-step" id="step-transcribe">
+                        <div class="status-dot"></div>
+                        <span>3. Running Whisper Transcription...</span>
+                    </div>
+                    <div class="status-step" id="step-diarize">
+                        <div class="status-dot"></div>
+                        <span>4. Running Speaker Diarization...</span>
+                    </div>
+                    <div class="status-step" id="step-merge">
+                        <div class="status-dot"></div>
+                        <span>5. Merging & Timeline Alignment...</span>
+                    </div>
+                    <div class="status-step" id="step-complete">
+                        <div class="status-dot"></div>
+                        <span>6. Completed</span>
+                    </div>
+                </div>
+
+                <div class="error-card" id="error-box">
+                    <div class="error-title">❌ Pipeline Error</div>
+                    <div id="error-message" style="font-size: 0.9rem; white-space: pre-wrap;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-container" id="results-panel">
+            <h2 style="font-size: 1.5rem;">📊 Processing Results</h2>
+            
+            <div class="metrics-grid" id="metrics-panel">
+                <!-- Metrics populated via JS -->
+            </div>
+
+            <h2 style="font-size: 1.25rem; margin-top: 1rem;">📦 Output Downloads</h2>
+            <div class="downloads-container">
+                <button class="btn btn-secondary" onclick="downloadFile('transcript')">📄 Transcript (txt)</button>
+                <button class="btn btn-secondary" onclick="downloadFile('merged')">🔗 Merged Transcripts (json)</button>
+                <button class="btn btn-secondary" onclick="downloadFile('metadata')">ℹ️ Audio Metadata (json)</button>
+                <button class="btn btn-secondary" onclick="downloadFile('benchmark')">⚡ Diagnostics (json)</button>
+                <button class="btn btn-secondary" onclick="downloadFile('whisper')">🔊 Raw Whisper (json)</button>
+                <button class="btn btn-secondary" onclick="downloadFile('diarization')">🗣️ Raw Diarization (json)</button>
+            </div>
+
+            <div class="audio-player-container" style="max-width: 600px; margin-top: 1rem;">
+                <div style="font-weight: 500; font-size: 0.95rem;">Input Playback</div>
+                <audio id="pipeline-audio-playback" controls></audio>
+            </div>
+
+            <h2 style="font-size: 1.25rem; margin-top: 1rem;">✍️ Transcript</h2>
+            <div class="transcript-view" id="transcript-feed">
+                <!-- Transcript segments populated via JS -->
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        Speech-to-Text + Diarization Development Tool | OS: <span id="footer-os">Detecting...</span>
+    </footer>
+
+    <script>
+        let selectedFile = null;
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let recordedBlob = null;
+
+        // Element hooks
+        const dropZone = document.getElementById('drop-zone');
+        const filePicker = document.getElementById('file-picker');
+        const btnSubmit = document.getElementById('btn-pipeline-submit');
+        const btnRecStart = document.getElementById('btn-record-start');
+        const btnRecStop = document.getElementById('btn-record-stop');
+        const recPlayback = document.getElementById('recorded-audio-playback');
+        const recStatus = document.getElementById('rec-status');
+        const errorBox = document.getElementById('error-box');
+        const errorMessage = document.getElementById('error-message');
+        const resultsPanel = document.getElementById('results-panel');
+        const transcriptFeed = document.getElementById('transcript-feed');
+        const metricsPanel = document.getElementById('metrics-panel');
+        const pipelineAudioPlayback = document.getElementById('pipeline-audio-playback');
+
+        // Drop zone drag and drop handlers
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                setFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        filePicker.addEventListener('change', () => {
+            if (filePicker.files.length > 0) {
+                setFile(filePicker.files[0]);
+            }
+        });
+
+        function setFile(file) {
+            selectedFile = file;
+            recordedBlob = null;
+            recPlayback.style.display = 'none';
+            recStatus.textContent = "Browser Microphone Recorder";
+            dropZone.querySelector('span:nth-child(2)').textContent = `Selected: ${file.name} (${formatBytes(file.size)})`;
+            btnSubmit.disabled = false;
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Browser microphone recording
+        btnRecStart.addEventListener('click', async () => {
+            audioChunks = [];
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                
+                mediaRecorder.addEventListener('dataavailable', (event) => {
+                    audioChunks.push(event.data);
+                });
+
+                mediaRecorder.addEventListener('stop', () => {
+                    recordedBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    const audioUrl = URL.createObjectURL(recordedBlob);
+                    recPlayback.src = audioUrl;
+                    recPlayback.style.display = 'block';
+                    recStatus.textContent = "Recording complete! Playback or submit below.";
+                    
+                    // Reset file picker selection
+                    selectedFile = null;
+                    dropZone.querySelector('span:nth-child(2)').textContent = "Choose an audio file or drag & drop";
+                    btnSubmit.disabled = false;
+                });
+
+                mediaRecorder.start();
+                btnRecStart.disabled = true;
+                btnRecStop.disabled = false;
+                recStatus.textContent = "🎤 Recording from microphone... Speak now!";
+            } catch (err) {
+                alert("Microphone access denied or unsupported by browser: " + err.message);
+            }
+        });
+
+        btnRecStop.addEventListener('click', () => {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                btnRecStart.disabled = false;
+                btnRecStop.disabled = true;
+            }
+        });
+
+        // Pipeline processing submit
+        btnSubmit.addEventListener('click', async () => {
+            const formData = new FormData();
+            if (selectedFile) {
+                formData.append('file', selectedFile);
+                pipelineAudioPlayback.src = URL.createObjectURL(selectedFile);
+            } else if (recordedBlob) {
+                formData.append('file', recordedBlob, 'browser_recording.wav');
+                pipelineAudioPlayback.src = URL.createObjectURL(recordedBlob);
+            } else {
+                return;
+            }
+
+            resetPipelineSteps();
+            resultsPanel.style.display = 'none';
+            errorBox.style.display = 'none';
+            btnSubmit.disabled = true;
+
+            // Trigger steps simulation while request runs
+            let activeStep = 0;
+            const steps = ['validate', 'normalize', 'transcribe', 'diarize', 'merge'];
+            
+            const stepInterval = setInterval(() => {
+                if (activeStep < steps.length) {
+                    // Complete previous
+                    if (activeStep > 0) {
+                        setStepState(steps[activeStep - 1], 'completed');
+                    }
+                    // Activate current
+                    setStepState(steps[activeStep], 'active');
+                    activeStep++;
+                } else {
+                    clearInterval(stepInterval);
+                }
+            }, 6000); // 6s per step simulation
+
+            setStepState('validate', 'active');
+            activeStep = 1;
+
+            try {
+                const response = await fetch('/api/v1/diarize', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                clearInterval(stepInterval);
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.detail || `Server returned error ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                // Complete all steps
+                steps.forEach(s => setStepState(s, 'completed'));
+                setStepState('complete', 'completed');
+
+                // Load benchmark details to populate metrics
+                const benchResp = await fetch('/api/v1/download/benchmark');
+                if (benchResp.ok) {
+                    const benchmark = await benchResp.json();
+                    const metaResp = await fetch('/api/v1/download/metadata');
+                    const metadata = metaResp.ok ? await metaResp.json() : {};
+                    renderResults(result, benchmark, metadata);
+                } else {
+                    renderResults(result, null, null);
+                }
+
+            } catch (err) {
+                clearInterval(stepInterval);
+                steps.forEach(s => setStepState(s, ''));
+                setStepState('complete', '');
+                
+                errorBox.style.display = 'flex';
+                errorMessage.textContent = err.message;
+            } finally {
+                btnSubmit.disabled = false;
+            }
+        });
+
+        function resetPipelineSteps() {
+            const steps = ['validate', 'normalize', 'transcribe', 'diarize', 'merge', 'complete'];
+            steps.forEach(s => {
+                const el = document.getElementById(`step-${s}`);
+                el.className = 'status-step';
+            });
+        }
+
+        function setStepState(stepId, state) {
+            const el = document.getElementById(`step-${stepId}`);
+            if (el) {
+                el.className = `status-step ${state}`;
+            }
+        }
+
+        function downloadFile(fileType) {
+            window.open(`/api/v1/download/${fileType}`, '_blank');
+        }
+
+        function renderResults(segments, benchmark, metadata) {
+            resultsPanel.style.display = 'flex';
+            resultsPanel.scrollIntoView({ behavior: 'smooth' });
+
+            // Populate Metrics
+            metricsPanel.innerHTML = '';
+            
+            const totalTime = benchmark ? `${benchmark.metrics.total_processing_time_seconds.toFixed(2)}s` : 'N/A';
+            const rtf = benchmark ? `${benchmark.metrics.real_time_factor_rtf.toFixed(2)}x` : 'N/A';
+            const device = benchmark ? benchmark.machine_info.gpu_acceleration : 'N/A';
+            const model = benchmark ? benchmark.configuration.whisper_model : 'N/A';
+            const duration = metadata ? `${metadata.duration.toFixed(1)}s` : 'N/A';
+            const channels = metadata ? (metadata.channels === 1 ? 'Mono' : 'Stereo') : 'N/A';
+
+            const metrics = [
+                { val: totalTime, label: 'Processing Time' },
+                { val: rtf, label: 'Real-Time Factor (RTF)' },
+                { val: duration, label: 'Audio Duration' },
+                { val: device, label: 'Acceleration Device' },
+                { val: model, label: 'Whisper Model' },
+                { val: channels, label: 'Channels' }
+            ];
+
+            metrics.forEach(m => {
+                const card = document.createElement('div');
+                card.className = 'metric-card';
+                card.innerHTML = `
+                    <div class="metric-label">${m.label}</div>
+                    <div class="metric-val">${m.val}</div>
+                `;
+                metricsPanel.appendChild(card);
+            });
+
+            // Populate Transcript Feed
+            transcriptFeed.innerHTML = '';
+            
+            if (segments.length === 0) {
+                transcriptFeed.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 2rem;">No speech segments detected in this file.</div>';
+                return;
+            }
+
+            segments.forEach(seg => {
+                const isLowConf = seg.text.startsWith('[Low Confidence]');
+                const cleanText = isLowConf ? seg.text.replace('[Low Confidence] ', '') : seg.text;
+                
+                const block = document.createElement('div');
+                block.className = 'segment-block';
+                block.innerHTML = `
+                    <div class="segment-meta">
+                        <span class="segment-speaker">${seg.speaker}</span>
+                        <span class="segment-time">${formatTime(seg.start)}</span>
+                        <span class="segment-conf">Confidence: ${(seg.confidence * 100).toFixed(0)}%</span>
+                    </div>
+                    <div class="segment-text ${isLowConf ? 'low-conf' : ''}">
+                        ${isLowConf ? '[Low Confidence] ' : ''}${cleanText}
+                    </div>
+                `;
+                transcriptFeed.appendChild(block);
+            });
+        }
+
+        function formatTime(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = Math.floor(seconds % 60);
+            const pad = (n) => String(n).padStart(2, '0');
+            return `${pad(h)}:${pad(m)}:${pad(s)}`;
+        }
+
+        // Detect OS and populate footer
+        window.addEventListener('DOMContentLoaded', () => {
+            const platform = window.navigator.platform || '';
+            let osName = 'Unknown OS';
+            if (platform.toLowerCase().includes('mac')) osName = 'macOS';
+            else if (platform.toLowerCase().includes('win')) osName = 'Windows';
+            else if (platform.toLowerCase().includes('linux')) osName = 'Linux';
+            document.getElementById('footer-os').textContent = osName;
+        });
+    </script>
+</body>
+</html>

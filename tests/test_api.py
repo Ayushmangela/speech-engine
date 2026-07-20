@@ -62,3 +62,39 @@ def test_api_diarize_server_error(mock_run_pipeline):
 
     assert response.status_code == 500
     assert "Audio processing failed" in response.json()["detail"]
+
+
+def test_get_web_interface_success():
+    """Verify that serving the web interface returns HTML containing the app title."""
+    response = client.get("/")
+    assert response.status_code == 200
+    assert "Speech Engine" in response.text
+
+
+def test_download_file_success(tmp_path, monkeypatch):
+    """Verify that downloading a valid existing file returns the content and correct status."""
+    # Override settings.OUTPUT_DIR to a temp directory
+    monkeypatch.setattr(settings, "OUTPUT_DIR", tmp_path)
+
+    test_file = tmp_path / "transcript.txt"
+    test_file.write_text("Merged Speaker 1 turn")
+
+    response = client.get("/api/v1/download/transcript")
+    assert response.status_code == 200
+    assert response.text == "Merged Speaker 1 turn"
+
+
+def test_download_file_not_found(tmp_path, monkeypatch):
+    """Verify that downloading a non-existent file returns a 404 error."""
+    monkeypatch.setattr(settings, "OUTPUT_DIR", tmp_path)
+
+    response = client.get("/api/v1/download/transcript")
+    assert response.status_code == 404
+    assert "not found" in response.json()["detail"]
+
+
+def test_download_file_invalid_type():
+    """Verify that requesting an invalid download type returns a 400 error."""
+    response = client.get("/api/v1/download/invalid_type")
+    assert response.status_code == 400
+    assert "Invalid file type" in response.json()["detail"]
