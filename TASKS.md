@@ -28,3 +28,11 @@
 - [x] Create final API and benchmark tests in `tests/test_api.py` (Status: Verified)
 - [x] Run formatter, linter, verify full test coverage, and complete project validation (Status: Verified)
 - [x] Commit Milestone 4 and final documentation to Git (Status: Verified)
+
+## Milestone 5: Real-World Validation
+- [x] Download real AMI meeting corpus recording (Status: Verified)
+- [x] Run end-to-end pipeline CLI on real audio (Status: Verified)
+- [x] Verify all output files generated and correct (Status: Verified)
+- [x] Fix library compatibility bugs: huggingface_hub, matplotlib, PyTorch 2.6 weights_only, and NumPy 2.x np.NAN (Status: Verified)
+- [x] Create REAL_WORLD_VALIDATION.md report and commit changes (Status: Verified)
+
