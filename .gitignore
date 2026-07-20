@@ -1,0 +1,28 @@
+# Virtual Environment
+.venv/
+venv/
+ENV/
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local Configurations & Logs
+.env
+logs/
+*.log
+
+# Audio files (preserve folder structure, but ignore files)
+audio/raw/*
+!audio/raw/.gitkeep
+audio/normalized/*
+!audio/normalized/.gitkeep
+
+# Output files
+output/*
+!output/.gitkeep
