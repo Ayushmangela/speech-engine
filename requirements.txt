@@ -11,11 +11,13 @@ torch==2.6.0
 torchaudio==2.6.0
 pyannote.audio==3.3.1
 soundfile==0.12.1
+matplotlib
+
 
 # manual dependencies for faster-whisper (bypassing strict av<13 constraint)
 av>=18.0.0
 ctranslate2>=4.0.0,<5.0.0
-huggingface-hub>=0.13
+huggingface-hub>=0.13,<0.25.0
 tokenizers>=0.13
 tqdm
 flatbuffers

@@ -4,6 +4,9 @@ import torch
 from src.registry import ModelRegistry
 
 
+from src.config import settings
+
+
 @pytest.fixture(autouse=True)
 def reset_registry():
     """Resets ModelRegistry internal state before each test."""
@@ -24,7 +27,7 @@ def test_whisper_model_caching(mock_get_device, mock_whisper_class):
 
     assert model1 is model2
     mock_whisper_class.assert_called_once_with(
-        "turbo", device="cpu", compute_type="int8"
+        settings.WHISPER_MODEL, device="cpu", compute_type="int8"
     )
 
 

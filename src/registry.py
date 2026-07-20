@@ -79,6 +79,15 @@ class ModelRegistry:
         Uses HF_TOKEN environment variable.
         """
         if cls._diarization_pipeline is None:
+            import torch
+            import numpy as np
+
+            # NumPy 2.x compatibility monkeypatch for older pyannote.audio versions
+            if not hasattr(np, "NAN"):
+                np.NAN = np.nan
+            if not hasattr(np, "NaN"):
+                np.NaN = np.nan
+
             # We import here to avoid loading pyannote.audio if not needed
             from pyannote.audio import Pipeline
 
@@ -91,6 +100,17 @@ class ModelRegistry:
             logger.info(
                 "Loading pyannote/speaker-diarization-3.1 pipeline from Hugging Face..."
             )
+
+            # Temporary monkeypatch of torch.load to bypass weights_only constraint in PyTorch 2.6+
+            orig_load = torch.load
+
+            def patched_load(*args, **kwargs):
+                if "weights_only" in kwargs:
+                    kwargs["weights_only"] = False
+                return orig_load(*args, **kwargs)
+
+            torch.load = patched_load
+
             try:
                 pipeline = Pipeline.from_pretrained(
                     "pyannote/speaker-diarization-3.1", use_auth_token=hf_token
@@ -112,5 +132,8 @@ class ModelRegistry:
                 raise RuntimeError(
                     f"Failed to load pyannote speaker diarization pipeline: {e}"
                 ) from e
+            finally:
+                # Restore original torch.load function
+                torch.load = orig_load
 
         return cls._diarization_pipeline
